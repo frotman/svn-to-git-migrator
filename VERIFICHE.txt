@@ -1,0 +1,161 @@
+SVN → Git — versione 1.2.0
+Data: 18 novembre 2026
+
+CORREZIONE DELLA STORIA 1.2.0
+
+Le nuove importazioni seguono la storia della directory scelta attraverso
+copie e spostamenti, usando l'URL alla revisione massima come peg revision.
+La selezione non si ferma più all'ultima copia del ramo (--stop-on-copy).
+La prima revisione viene calcolata dal log e non è fissata a un valore predefinito.
+L'interfaccia distingue l'origine della storia dalla creazione del ramo corrente.
+
+Il motore SVN CLI + Git è predefinito su Windows, Linux, macOS e WSL.
+Le nuove importazioni non richiedono git-svn. Il codice del motore precedente
+rimane per compatibilità delle API, verifiche e uso esplicito di dati precedenti.
+Il riferimento git-svn-id usa l'URL storico corretto per ogni revisione.
+
+L'ambito history_scope=lineage identifica una cartella di lavoro distinta
+rispetto alle importazioni parziali 1.1.x; le vecchie cartelle restano disponibili.
+La pubblicazione continua a rifiutare un branch remoto con commit diversi.
+
+PREPARAZIONE REPOSITORY PUBBLICO
+
+I sorgenti separati, il file unico, lo script di assemblaggio e la documentazione
+sono mantenuti alla versione 1.2.0. Gli esempi usano nomi e revisioni generici.
+README.md descrive l'avvio, i quattro campi e la posizione dei dati locali.
+Il file .gitignore esclude configurazione e stato delle migrazioni, log,
+cache Python, ambienti virtuali, archivi ZIP di build e file locali degli IDE.
+Il file unico svn_git_migrator.py rimane tracciabile; non è prevista un'esclusione
+generica dei file JSON. Nessuna licenza o attribuzione è assegnata automaticamente.
+Queste modifiche alla distribuzione non introducono nuovi risultati di test:
+gli esiti della versione 1.2.0 sono riportati nella sezione seguente.
+
+VERIFICA VERSIONE 1.2.0
+
+50 test automatici passati, senza skip, sul file unico svn_git_migrator.py
+assemblato (ambiente Linux, SVN/svnadmin 1.14.5 e Git/git-svn 2.47.3).
+Durata della suite completa: 22,007 secondi. Ripartizione:
+- 31 test di regressione delle versioni precedenti, rieseguiti con successo.
+- 12 test della mappa dei percorsi ereditati: XML e una fixture SVN reale.
+- 3 integrazioni reali del nuovo importatore con storia ereditata.
+- 4 test dello stato salvato, della separazione dalle vecchie importazioni
+  e della provenienza storica dei commit.
+
+Le nuove integrazioni confrontano ogni commit Git con svn export del relativo
+URL storico alla stessa revisione; verificano autori, date, messaggi e marker.
+Comprendono copie di directory genitrici, copia da una revisione vecchia che
+esclude le modifiche successive della sorgente, rinomina, origine e destinazione
+eliminate a HEAD dopo il limite scelto, ripresa tra due segmenti, sostituzione
+dello stesso percorso, pubblicazione e ripetizione idempotente.
+
+Il planner è confrontato anche con la risoluzione di SVN:
+svn info --xml -r R URL_CORRENTE@REVISIONE_MASSIMA
+Sono coperti nomi codificati, metadati di copia incompleti e limiti incoerenti.
+Il caricamento rifiuta URL salvate incoerenti con radice e percorso storico.
+Il self-check del file unico 1.2.0 è riuscito; non richiede git-svn.
+
+I risultati qui sotto sono la baseline delle versioni precedenti e non
+costituiscono, da soli, una verifica delle nuove funzioni della 1.2.0.
+
+CORREZIONE AVVIO 1.1.1
+
+Rimossa l'esclusione preventiva degli interpreti nel percorso WindowsApps:
+ora anche quei candidati vengono verificati eseguendo il controllo di versione,
+piattaforma Windows e disponibilità di Tkinter. Il launcher mostra l'interprete
+selezionato; la guida distingue py -3 da python3.exe senza -3.
+Disattivata l'installazione automatica anche per il launcher Python precedente.
+Controllati i terminatori CRLF del file CMD, assemblaggio e sintassi Python.
+Nella 1.1.1 il motore di migrazione era identico alla 1.1.0 verificata qui sotto.
+Nessuna esecuzione del launcher su un Windows reale in questo ambiente.
+
+VERIFICA VERSIONE 1.1.0
+
+31 test automatici passati, senza skip, nell'ambiente Linux di prova:
+- 7 test del motore precedente git-svn e pianificazione sparsa.
+- 9 test reali del nuovo motore SVN CLI + Git, senza git-svn.
+- 12 test della ricerca e configurazione dei client Windows, simulati su Linux.
+- 3 test per URL GitLab errati, trasporto binario esatto e preferenze SSH Windows.
+
+Le integrazioni sono state eseguite anche sul file unico assemblato.
+I test nativi verificano autori/date/messaggi, selezione delle revisioni,
+binari/Unicode/symlink, executable bit, EOL canonici e keyword non espanse,
+file esclusi da .gitignore ma da importare, filtri Git esterni disattivati
+soltanto per il checkout finale, copie e sostituzioni di sottodirectory con
+stessa ultima revisione ma contenuti diversi, proprietà/directory vuote,
+interruzione/ripresa, idempotenza e protezione dei branch remoti esistenti.
+Un'alterazione manuale della working copy privata viene rifiutata e conservata.
+
+La ricerca Windows copre PATH, percorsi con spazi, registro, installazioni
+standard e personalizzate, TortoiseSVN senza client CLI, configurazione SVN
+APPDATA, override espliciti e conservazione del client SSH scelto dall'utente.
+Queste simulazioni non equivalgono a un'esecuzione su Windows.
+
+BASELINE DEL MOTORE GIT-SVN
+
+Nella versione iniziale sono stati eseguiti sette test automatici, tutti passati senza skip, con repository SVN e Git locali
+reali e indipendenti da account o server esterni.
+
+Ambiente del backend: Linux, Subversion/svnadmin 1.14.5, git-svn 2.47.3.
+
+Casi coperti:
+- Intervallo di revisioni e selezione del solo branch.
+- Snapshot iniziale completo da una copia del trunk.
+- Copia di sottodirectory da un percorso escluso dalla storia.
+- Confronto del tree Git con svn export alla revisione massima.
+- Conservazione degli username, delle date (precisione Git al secondo), dei
+  messaggi di commit e del riferimento git-svn-id.
+- File binari, contenuti e nomi Unicode, link simbolici, rinomine e cancellazioni.
+- Revisioni con sole proprietà SVN e creazione di directory vuote: commit
+  presenti nella cronologia; le directory vuote non sono rappresentate nel tree.
+- Interruzione al primo commit importato, poi ripresa con una nuova istanza.
+- Riesecuzione idempotente.
+- Nessun push durante l'importazione locale.
+- Pubblicazione esplicita su un Git bare locale e verifica del riferimento.
+- Seconda pubblicazione idempotente.
+- Rifiuto di un branch remoto con storia diversa e verifica del suo SHA inalterato.
+- Pianificazione di revisioni molto distanti senza enumerare i numeri intermedi.
+
+Interfaccia grafica avviata e ispezionata su un desktop Linux reale:
+verificati i quattro campi, l'impaginazione, gli stati iniziali dei pulsanti e
+il rifiuto dei campi vuoti. Validazione sintattica dei sorgenti e del file unico.
+
+COMANDO PER RIPETERE I TEST
+
+Dalla cartella estratta, con i requisiti e svnadmin disponibili:
+python3 -m unittest discover -s tests -v
+
+La suite completa include anche i test del motore precedente e richiede
+git-svn per eseguire quei test. Questa dipendenza di verifica non è necessaria
+per usare la GUI e il nuovo motore SVN CLI + Git.
+
+L'ambiente di prova aveva dipendenze temporanee separate, non incluse nello ZIP.
+
+LIMITI DELLA VERIFICA
+
+Non è stata cronometrata un'importazione con milioni di revisioni o su una rete
+aziendale. Le prove usano repository locali generati per i test.
+Il launcher AVVIA_WINDOWS.cmd avvia Python nativo Windows. La versione 1.2.0
+usa Git e SVN a riga di comando su tutte le piattaforme, senza richiedere git-svn
+per le nuove importazioni.
+Il launcher e l'esecuzione nativa Windows/macOS non sono stati eseguiti su quei
+sistemi: la disponibilità dei client e il riuso delle credenziali
+devono essere verificati nell'ambiente di esecuzione. L'interfaccia della versione
+iniziale è stata verificata su Linux. Il launcher WSL rimane una modalità
+alternativa e separata.
+
+AMBITO DELLA STORIA
+
+La storia della 1.2.0 comprende gli antenati della directory SVN selezionata,
+anche attraverso copie e spostamenti di una directory che la contiene.
+Le revisioni estranee alla storia restano escluse. Una copia eredita il sorgente
+solo fino alla propria copyfrom-rev, non le sue modifiche successive.
+
+Non viene ricostruito il grafo dei merge, né viene aggiunta tutta la storia
+precedente di ogni singolo file o sottodirectory copiati successivamente dentro
+la directory selezionata. I contenuti di svn:externals restano esclusi.
+Le email login@UUID sono identificativi tecnici. Il client deve poter leggere
+la storia e i contenuti necessari con le credenziali configurate.
+
+I test storici 1.1.x descritti sopra usavano l'ambito limitato all'ultima copia
+del percorso. Sono conservati come baseline del motore e dei controlli di
+integrità; la selezione degli antenati è una funzione nuova della 1.2.0.

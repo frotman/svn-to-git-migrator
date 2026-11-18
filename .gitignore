@@ -1,0 +1,51 @@
+# Cache Python e ambienti virtuali
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Variabili e configurazione locale
+.env
+.env.*
+!.env.example
+settings.json
+settings.tmp
+
+# Stato e log delle migrazioni: mai parte dei sorgenti dello strumento
+migration.json
+migration.json.tmp
+analysis.json
+analysis.json.tmp
+result.json
+result.json.tmp
+published.json
+published.json.tmp
+migration.log*
+branch-log.xml*
+revisions.txt
+.migration.lock
+SVN_Git_Migrations/
+migration/
+repository/
+svn-working-copy/
+native-temporary/
+
+# Archivi e directory di build; il file unico Python resta tracciabile
+/*.zip
+/build/
+/dist/
+
+# Preferenze locali degli editor e del sistema operativo
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini
